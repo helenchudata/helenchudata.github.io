@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Original code and saved outputs.">
+<title>Telecom Churn Preparation Notebook | Helen Chu</title>
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+<body>
+<header><p class="eyebrow">Helen Chu · Data Analytics Portfolio</p><h1>Telecom Churn Preparation Notebook</h1><p>Original code and saved outputs.</p></header>
+<nav aria-label="Project navigation"><a href="../../index.html#projects">All Projects</a><a href="#summary">Project Summary</a><a href="#work">Project Work</a></nav>
+<main><div id="summary"></div><div id="work"><section class="panel"><pre># Summary/Notes
+
+### When you have finished your exploration, return to this markdown cell and fill it out in preparation for your meeting with the analytics manager, Victor.
+
+**1.** Provide a summary of the data. This can include information such as: 
+- How many total customers are represented in this data sample? 
+- What types of data are in these two data sources?
+- Is the data generally clean? Messy? etc.
+
+- Some takeaways from this analysis preparation, I was able to gain some insights to the data. The data included many demographic information such as age, marital status, gender, and dependents. In addition, it included services, such as, enrollment, phone, streaming, and internet. I found there were 7042 people for demographics and 7043 people for services. Services consist of datatypes such as objects, floats, and integer. Whereas, demographics have datatypes involving objects and integers. This gives us an understanding on how demographic and services can further help with analyzing churn rate.
+
+
+**2. Special request** What is the average customer tenure in days? Use 9/1/2020 as the current date (&quot;today&quot;). 
+- Unfortunately, I could not determine the average customer tenure in days as it returned &quot;Not a Number.&quot; I tried many methods to check for missing or invalid dates, all resulted the same answer. I made sure it was converted into datetime/datatype. I could draw a conclusion with the merged data.
+
+
+**3.** After researching the data, what 2-3 topics would you like to research further regarding customers that churn? (e,g,. Do any of our service types cause customers to churn faster than others?) Why do you think these factors may be related to churn? 
+- Do married customers churn at a higher rate than non-married customers? To further investigate if there is a relationship between marital status and churn. Could possibily influence service requirements and stability.
+- Is there a relationship between the number of dependents and churn? Depending on the number of dependents, customers might have different service requirements and patterns.
+- Does age play a factor in customer&#x27;s frequency to churn? There may be a possibility that younger customers churn more frequently.
+</pre></section><section class="panel"><pre>--------------</pre></section><section class="panel"><pre># How to Complete This Notebook
+
+This notebook has a skeleton structure to guide your exploration and keep you on track. More details about each task can be found in the project sidebar. Be sure to read the sidebar instructions for each step before writing your code. </pre></section><section class="panel"><pre># 1. Import &amp; Explore the Data
+
+## 1A. Import Packages</pre></section><section class="panel"><pre>import pandas as pd</pre></section><section class="panel"><pre>## 1B. Import the Data
+The datasets are stored in the following files:
+- &quot;demographics.csv&quot;
+- &quot;services.csv&quot;
+
+These files are in the same folder you are currently working in. </pre></section><section class="panel"><pre>demog_df = pd.read_csv(&#x27;demographics.csv&#x27;)</pre></section><section class="panel"><pre>services_df = pd.read_csv(&#x27;services.csv&#x27;)</pre></section><section class="panel"><pre>## 1C. Explore Your Data &amp; Identify Structure
+Add as many code cells as you need to thoroughly explore both DataFrames here.</pre></section><section class="panel"><pre>print(demog_df.head())</pre><pre class="output">      Customer_ID  Count  Gender  AGE Under 30 Senior Citizen MARRIED   
+0  TCO-8779-QRDMV      1    Male   78       No            Yes      No  \
+1  TCO-7495-OOKFY      1  Female   74       No            Yes     Yes   
+2  TCO-1658-BYGOY      1    Male   71       No            Yes      No   
+3  TCO-4598-XLKNJ      1  Female   78       No            Yes     Yes   
+4  TCO-4846-WHAFZ      1  Female   80       No            Yes     Yes   
+
+  Dependents Number of Dependents  
+0         No                    0  
+1        Yes                    1  
+2        Yes                    3  
+3        Yes                    1  
+4        Yes                    1  
+</pre></section><section class="panel"><pre>print(services_df.head())</pre><pre class="output">  Customer_ID  Count Quarter  Number_of_Referrals Customer_Enrollment_Date   
+0   8779QRDMV      1      Q3                    0                 8/1/2020  \
+1   7495OOKFY      1      Q3                    1                 1/1/2020   
+2   1658BYGOY      1      Q3                    0                 4/1/2019   
+3   4598XLKNJ      1      Q3                    1                 8/1/2018   
+4   4846WHAFZ      1      Q3                    1                 8/1/2017   
+
+     Offer Phone_Service Internet_Service Internet_Type   
+0      NaN            No              Yes           DSL  \
+1  Offer E           Yes              Yes   Fiber Optic   
+2  Offer D           Yes              Yes   Fiber Optic   
+3  Offer C           Yes              Yes   Fiber Optic   
+4  Offer C           Yes              Yes   Fiber Optic   
+
+   Avg_Monthly_GB_Download  ... Streaming_Music Unlimited_Data   
+0                      8.0  ...              No             No  \
+1                     17.0  ...              No            Yes   
+2                     52.0  ...             Yes            Yes   
+3                     12.0  ...              No            Yes   
+4                     14.0  ...              No            Yes   
+
+         Contract   Payment_Method Monthly_Charge Total_Charges   
+0  Month-to-Month  Bank Withdrawal          39.65         39.65  \
+1  Month-to-Month      Credit Card          80.65        633.30   
+2  Month-to-Month  Bank Withdrawal          95.45       1752.55   
+3  Month-to-Month  Bank Withdrawal          98.50       2514.50   
+4  Month-to-Month  Bank Withdrawal          76.50       2868.15   
+
+   Total_Refunds  Total_Extra_Data_Charges  Total_Long_Distance_Charges   
+0           0.00                        20                         0.00  \
+1           0.00                         0                       390.80   
+2          45.61                         0                       203.94   
+3          13.43                         0                       494.00   
+4           0.00                         0                       234.21   
+
+   Total_Revenue  
+0          59.65  
+1        1024.10  
+2        1910.88  
+3        2995.07  
+4        3102.36  
+
+[5 rows x 22 columns]
+</pre></section><section class="panel"><pre>print(demog_df.info())</pre><pre class="output">&lt;class &#x27;pandas.core.frame.DataFrame&#x27;&gt;
+RangeIndex: 7043 entries, 0 to 7042
+Data columns (total 9 columns):
+ #   Column                Non-Null Count  Dtype 
+---  ------                --------------  ----- 
+ 0   Customer_ID           7043 non-null   object
+ 1   Count                 7043 non-null   int64 
+ 2   Gender                7043 non-null   object
+ 3   AGE                   7043 non-null   int64 
+ 4   Under 30              7043 non-null   object
+ 5   Senior Citizen        7043 non-null   object
+ 6   MARRIED               7043 non-null   object
+ 7   Dependents            7043 non-null   object
+ 8   Number of Dependents  7043 non-null   object
+dtypes: int64(2), object(7)
+memory usage: 495.3+ KB
+None
+</pre></section><section class="panel"><pre>print(services_df.info())</pre><pre class="output">&lt;class &#x27;pandas.core.frame.DataFrame&#x27;&gt;
+RangeIndex: 7043 entries, 0 to 7042
+Data columns (total 22 columns):
+ #   Column                       Non-Null Count  Dtype  
+---  ------                       --------------  -----  
+ 0   Customer_ID                  7043 non-null   object 
+ 1   Count                        7043 non-null   int64  
+ 2   Quarter                      7043 non-null   object 
+ 3   Number_of_Referrals          7043 non-null   int64  
+ 4   Customer_Enrollment_Date     7043 non-null   object 
+ 5   Offer                        3166 non-null   object 
+ 6   Phone_Service                7043 non-null   object 
+ 7   Internet_Service             7043 non-null   object 
+ 8   Internet_Type                5517 non-null   object 
+ 9   Avg_Monthly_GB_Download      5517 non-null   float64
+ 10  Streaming_TV                 7043 non-null   object 
+ 11  Streaming_Movies             7043 non-null   object 
+ 12  Streaming_Music              7043 non-null   object 
+ 13  Unlimited_Data               7043 non-null   object 
+ 14  Contract                     7043 non-null   object 
+ 15  Payment_Method               7043 non-null   object 
+ 16  Monthly_Charge               7043 non-null   float64
+ 17  Total_Charges                7043 non-null   float64
+ 18  Total_Refunds                7043 non-null   float64
+ 19  Total_Extra_Data_Charges     7043 non-null   int64  
+ 20  Total_Long_Distance_Charges  7043 non-null   float64
+ 21  Total_Revenue                7043 non-null   float64
+dtypes: float64(6), int64(3), object(13)
+memory usage: 1.2+ MB
+None
+</pre></section><section class="panel"><pre>print(demog_df.isnull().sum())</pre><pre class="output">Customer_ID             0
+Count                   0
+Gender                  0
+AGE                     0
+Under 30                0
+Senior Citizen          0
+MARRIED                 0
+Dependents              0
+Number of Dependents    0
+dtype: int64
+</pre></section><section class="panel"><pre>print(services_df.isnull().sum())</pre><pre class="output">Customer_ID                       0
+Count                             0
+Quarter                           0
+Number_of_Referrals               0
+Customer_Enrollment_Date          0
+Offer                          3877
+Phone_Service                     0
+Internet_Service                  0
+Internet_Type                  1526
+Avg_Monthly_GB_Download        1526
+Streaming_TV                      0
+Streaming_Movies                  0
+Streaming_Music                   0
+Unlimited_Data                    0
+Contract                          0
+Payment_Method                    0
+Monthly_Charge                    0
+Total_Charges                     0
+Total_Refunds                     0
+Total_Extra_Data_Charges          0
+Total_Long_Distance_Charges       0
+Total_Revenue                     0
+dtype: int64
+</pre></section><section class="panel"><pre>print(demog_df.shape)</pre><pre class="output">(7043, 9)
+</pre></section><section class="panel"><pre>print(services_df.shape)</pre><pre class="output">(7043, 22)
+</pre></section><section class="panel"><pre>print(demog_df.dtypes)</pre><pre class="output">Customer_ID             object
+Count                    int64
+Gender                  object
+AGE                      int64
+Under 30                object
+Senior Citizen          object
+MARRIED                 object
+Dependents              object
+Number of Dependents    object
+dtype: object
+</pre></section><section class="panel"><pre>print(services_df.dtypes)</pre><pre class="output">Customer_ID                     object
+Count                            int64
+Quarter                         object
+Number_of_Referrals              int64
+Customer_Enrollment_Date        object
+Offer                           object
+Phone_Service                   object
+Internet_Service                object
+Internet_Type                   object
+Avg_Monthly_GB_Download        float64
+Streaming_TV                    object
+Streaming_Movies                object
+Streaming_Music                 object
+Unlimited_Data                  object
+Contract                        object
+Payment_Method                  object
+Monthly_Charge                 float64
+Total_Charges                  float64
+Total_Refunds                  float64
+Total_Extra_Data_Charges         int64
+Total_Long_Distance_Charges    float64
+Total_Revenue                  float64
+dtype: object
+</pre></section><section class="panel"><pre># 2. Demographics Dataset Wrangling
+</pre></section><section class="panel"><pre>## &lt;p style=&quot;color:red;&quot;&gt;2A. Standardize Column Titles&lt;/p&gt;
+**The code cell below is graded. Do not delete the cell.**</pre></section><section class="panel"><pre># WRITE YOUR SOLUTION HERE. DO NOT DELETE. THIS CELL IS GRADED.
+demog_df.columns = demog_df.columns.str.strip().str.lower().str.replace(&#x27; &#x27;, &#x27;_&#x27;)</pre></section><section class="panel"><pre>## 2B. Edit Data Types</pre></section><section class="panel"><pre>demog_df = demog_df[demog_df[&#x27;number_of_dependents&#x27;] != &#x27;O&#x27;]</pre></section><section class="panel"><pre>non_integer_values = demog_df[demog_df[&#x27;number_of_dependents&#x27;].str.contains(&#x27;O&#x27;, na=False)]
+print(non_integer_values)</pre><pre class="output">Empty DataFrame
+Columns: [customer_id, count, gender, age, under_30, senior_citizen, married, dependents, number_of_dependents]
+Index: []
+</pre></section><section class="panel"><pre>demog_df[&#x27;number_of_dependents&#x27;] = demog_df[&#x27;number_of_dependents&#x27;].astype(int)</pre></section><section class="panel"><pre>## &lt;span style=&quot;color:red;&quot;&gt;2C. Locate &amp; Fix Input Errors&lt;/span&gt;</pre></section><section class="panel"><pre>print(demog_df[&#x27;married&#x27;].unique())</pre><pre class="output">[&#x27;No&#x27; &#x27;Yes&#x27; &#x27;Y&#x27; &#x27;N&#x27;]
+</pre></section><section class="panel"><pre>**The code cell below is graded. Do not delete the cell.**</pre></section><section class="panel"><pre># WRITE YOUR SOLUTION HERE. DO NOT DELETE. THIS CELL IS GRADED.
+demog_df[&#x27;married&#x27;] = demog_df[&#x27;married&#x27;].replace({&#x27;Y&#x27;: &#x27;Yes&#x27;, &#x27;N&#x27;: &#x27;No&#x27;})</pre></section><section class="panel"><pre># 3. Services Dataset Wrangling</pre></section><section class="panel"><pre>## &lt;span style=&quot;color:red;&quot;&gt;3A. Standardize Column Titles&lt;/span&gt;</pre></section><section class="panel"><pre>**The code cell below is graded. Do not delete the cell.**</pre></section><section class="panel"><pre># WRITE YOUR SOLUTION HERE. DO NOT DELETE. THIS CELL IS GRADED.
+services_df.columns = services_df.columns.str.strip().str.lower().str.replace(&#x27; &#x27;, &#x27;_&#x27;)</pre></section><section class="panel"><pre>## &lt;span style=&quot;color:red;&quot;&gt;3B. Convert Data Types&lt;/span&gt;
+</pre></section><section class="panel"><pre>**The code cell below is graded. Do not delete the cell.**</pre></section><section class="panel"><pre># WRITE YOUR SOLUTION HERE. DO NOT DELETE. THIS CELL IS GRADED.
+services_df[&#x27;customer_enrollment_date&#x27;] = pd.to_datetime(services_df[&#x27;customer_enrollment_date&#x27;])</pre></section><section class="panel"><pre># 4. Merge the Dataframes</pre></section><section class="panel"><pre>## 4A. Identify the Connecting Columns</pre></section><section class="panel"><pre>print(demog_df[&#x27;customer_id&#x27;].unique())</pre><pre class="output">[&#x27;TCO-8779-QRDMV&#x27; &#x27;TCO-7495-OOKFY&#x27; &#x27;TCO-1658-BYGOY&#x27; ... &#x27;TCO-2234-XADUH&#x27;
+ &#x27;TCO-4801-JZAZL&#x27; &#x27;TCO-3186-AJIEK&#x27;]
+</pre></section><section class="panel"><pre>print(services_df[&#x27;customer_id&#x27;].unique())</pre><pre class="output">[&#x27;8779QRDMV&#x27; &#x27;7495OOKFY&#x27; &#x27;1658BYGOY&#x27; ... &#x27;2234XADUH&#x27; &#x27;4801JZAZL&#x27;
+ &#x27;3186AJIEK&#x27;]
+</pre></section><section class="panel"><pre>## &lt;p style=&quot;color:red;&quot;&gt;4B. Manipulate the Connecting Columns&lt;/p&gt;
+
+**The code cell below is graded. Do not delete the cell.**</pre></section><section class="panel"><pre># WRITE YOUR SOLUTION HERE. DO NOT DELETE. THIS CELL IS GRADED.
+demog_df[&#x27;customer_id&#x27;] = demog_df[&#x27;customer_id&#x27;].astype(str).str.strip()
+services_df[&#x27;customer_id&#x27;] = services_df[&#x27;customer_id&#x27;].astype(str).str.strip()</pre></section><section class="panel"><pre>## &lt;p style=&quot;color:red;&quot;&gt;4C. Merge the DataFrames&lt;/p&gt;
+**The code cell below is graded. Do not delete the cell.**</pre></section><section class="panel"><pre># WRITE YOUR SOLUTION HERE. DO NOT DELETE. THIS CELL IS GRADED.
+tco_df = pd.merge(demog_df, services_df, on=&#x27;customer_id&#x27;)</pre></section><section class="panel"><pre># 5. Complete the Summary </pre></section><section class="panel"><pre>## 5A. Provide a summary of the data 
+**Summarize the data in the markdown cell at the top of this Jupyter Notebook.**</pre></section><section class="panel"><pre>## &lt;p style=&quot;color:red;&quot;&gt;5B. Calculate customer tenure in days&lt;/p&gt;
+**The code cell below is graded. Do not delete the cell.**</pre></section><section class="panel"><pre># WRITE YOUR SOLUTION HERE. DO NOT DELETE. THIS CELL IS GRADED.
+today_date = pd.to_datetime(&#x27;2020-09-01&#x27;)
+
+tco_df[&#x27;customer_tenure&#x27;] = (today_date - tco_df[&#x27;customer_enrollment_date&#x27;]).dt.days
+
+average_tenure = tco_df[&#x27;customer_tenure&#x27;].mean()
+
+print(f&quot;Average customer tenure: {average_tenure} days&quot;)</pre><pre class="output">Average customer tenure: nan days
+</pre></section><section class="panel"><pre>## 5C. Select 2-3 Topics for Further Research
+**Add these into the markdown cell at the top of the Jupyter Notebook**</pre></section></div></main>
+<footer><a href="../../index.html#projects">Explore all projects</a></footer>
+</body></html>

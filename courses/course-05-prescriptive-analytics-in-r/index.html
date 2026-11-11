@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A simulation in R to compare airline ticket limits when passenger no-shows are uncertain.">
+  <title>Airline Overbooking Simulation | Helen Chu</title>
+  <link rel="stylesheet" href="../../assets/styles.css">
+</head>
+<body>
+  <header>
+    <p class="eyebrow">Helen Chu · R</p>
+    <h1>Airline Overbooking Simulation</h1>
+    <p>A simulation in R to compare airline ticket limits when passenger no-shows are uncertain.</p>
+  </header>
+  <nav aria-label="Course navigation">
+    <a href="../../index.html#projects">All Projects</a>
+    <a href="#project-summary">Project Summary</a><a href="#skills-and-learning">Skills and Learning</a>
+    <a href="#project">Model Assumptions</a>
+    <a href="#results">Simulated Profit by Overbooking Level</a>
+    <a href="https://public.tableau.com/app/profile/helen.chu6052/vizzes">Tableau Public</a>
+  </nav>
+  <main>
+    <section class="panel" id="project-summary">
+      <h2>Project Summary</h2>
+      <h3>Airline Overbooking Decision Model</h3>
+      <p>I compared ticket limits for a 132-seat flight when some passengers might miss departure. Starting from a deterministic model, I simulated 1,000 flights per ticket limit using binomial no-shows and accounted for refunds and bumping costs. The highest plotted average profit occurred around 14 extra tickets under the model’s assumptions.</p>
+    </section>
+<section class="panel learning-panel" id="skills-and-learning"><h2>Skills and What I Learned</h2><ul class="skill-tags" aria-label="Project skills"><li>R</li><li>Monte Carlo simulation</li><li>Binomial models</li><li>Decision analysis</li></ul><p>I learned to replace a single expected-outcome calculation with a range of simulated outcomes. Changing assumptions about no-shows, refunds, and bumping costs can change the preferred ticket limit.</p></section>
+    <section class="panel" id="project">
+      <h2>Model Assumptions</h2>
+      <p class="eyebrow">Decision Modeling in R</p>
+      <h3>Make a Non-Deterministic Decision Model Based on a Deterministic Model</h3>
+      <p>The model used a $200 fare and a 10% no-show probability. Each no-show received a refund of half the fare, and each bumped passenger cost 2.5 times the fare. I compared limits from 132 to 152 tickets and averaged simulated profit for each limit.</p>
+    </section>
+    <section class="panel" id="results">
+      <h2>Simulated Profit by Overbooking Level</h2>
+      <figure class="project-figure">
+        <img src="artifacts/airline-overbooking-mean-profit.png" width="588" height="760" loading="lazy" alt="Mean simulated profit rises until approximately 14 extra tickets and then declines.">
+        <figcaption>The original R plot uses a one-based index. Index 1 represents no overbooking. The highest plotted mean is around index 15, corresponding to 14 extra tickets.</figcaption>
+      </figure>
+      <p>This is the best result among the simulated choices under the project’s assumptions. A different no-show rate or bumping cost could change the preferred ticket limit.</p>
+      <div class="actions">
+        <a class="button" href="artifacts/airline-overbooking-mean-profit.pdf">View the profit plot (PDF)</a>
+        <a class="button" href="artifacts/airline-overbooking-r-model.pdf">View the R model (PDF)</a>
+      </div>
+    </section>
+  </main>
+  <footer><a href="../../index.html#projects">Explore all projects</a></footer>
+</body>
+</html>

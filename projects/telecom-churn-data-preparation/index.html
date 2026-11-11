@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="An initial exploration and cleaning workflow for telecom customer data.">
+<title>Telecom Churn Data Preparation | Helen Chu</title>
+<link rel="stylesheet" href="../../assets/styles.css">
+</head>
+<body>
+<header><p class="eyebrow">Helen Chu · Data Analytics Portfolio</p><h1>Telecom Churn Data Preparation</h1><p>An initial exploration and cleaning workflow for telecom customer data.</p></header>
+<nav aria-label="Project navigation"><a href="../../index.html#projects">All Projects</a><a href="#summary">Project Summary</a><a href="#skills-and-learning">Skills and Learning</a><a href="#work">Project Work</a></nav>
+<main><section class="panel" id="project-progression"><h2>Telecom Churn Analysis · Project Progression</h2><ol><li><strong>Part 1 · Data Preparation</strong><p>Inspect source data, standardize fields, and identify join requirements.</p></li><li><a href="../telecom-churn-visual-analysis/index.html">Part 2 · Visual Analysis</a><p>Explore customer characteristics and compare churn across service and contract groups.</p></li><li><a href="../telecom-churn-hypothesis-testing/index.html">Part 3 · Hypothesis Testing</a><p>Compare subgroup churn rates using two-proportion tests.</p></li></ol></section><section class="panel" id="summary"><h2>Project Summary</h2><p class="eyebrow">Data Preparation — Initial Stage</p>
+<p>I inspected demographics and service records, standardized column names, converted dates and data types, and normalized marital-status values before attempting a customer-level merge.</p></section>
+<section class="panel learning-panel" id="skills-and-learning"><h2>Skills and What I Learned</h2><ul class="skill-tags" aria-label="Project skills"><li>Python</li><li>pandas</li><li>Data cleaning</li><li>Join validation</li></ul><p>I learned that matching column names alone does not guarantee a successful merge. Identifier formats must agree, and row counts and matched records should be checked before calculating downstream statistics.</p></section>
+<section class="panel"><h2>Initial Findings and Project Progression</h2><p>Both input files begin with 7,043 records. The notebook removes one demographics record during cleaning. It also finds missing offer values and internet-related fields that need interpretation before further analysis.</p>
+<p>The initial notebook documents an ID-format mismatch that produced an empty merge and a NaN tenure result. The later project stages use prepared customer data and successful joins to explore churn visually and test differences between customer groups.</p></section>
+<section class="panel" id="work"><h2>Project Work</h2><div class="actions">
+<a class="button" href="telecom-churn-data-preparation.html">Read the notebook</a>
+<a class="button" href="telecom-churn-data-preparation.zip" download>Download notebook and data</a></div></section></main>
+<footer><a href="../../index.html#projects">Explore all projects</a></footer>
+</body></html>

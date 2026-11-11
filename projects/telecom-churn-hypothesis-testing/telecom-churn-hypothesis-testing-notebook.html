@@ -1,0 +1,365 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Telecom Churn Hypothesis Testing · Notebook | Helen Chu</title><link rel="stylesheet" href="../../assets/styles.css"></head><body>
+<header><p class="eyebrow">Helen Chu · Analysis Notebook</p><h1>Telecom Churn Hypothesis Testing</h1></header><nav><a href="index.html">Project Summary</a><a href="../../index.html#projects">All Projects</a></nav><main><section class="panel"><h2>SUMMARY </h2><p>In this project, I performed three hypotheses to study churn rate on age, unlimited data, and internet type. When performing the tests, it was interesting to discover findings and to see if the null hypothesis will be rejected. In my first hypothesis, I analyzed if customers under 30 churn at a higher rate compared to those 30 and above. My second hypothesis, I looked to sese if customers with unlimited data churn at a higher rate compared to those without. Lastly, I also investigated to see if customers with Fiber Optic internet churned at a higher rate than non-Fiber Optic customers. </p><p>To my findings, I found customers that are 30 years and over have a higher churn rate of 27.7%. There was a negative direction of difference in the z-stat and a significiant difference in churn rates between age groups. This could be an indicator that younger customers are more brand loyal where as older customers switch providers. I suggest to further study older customers and potential strategies such as marketing approach, offers, and surveys.</p><p>In addition, I discovered that customers with unlimited data plans have a higher churn rate of 31.6%. There was a significant different in churn rates between customers with and without unlimited data. This may suggest there is dissastifaction with the product and to investigate potential issues includings, price, performance, and competitor. </p><p>To conclude, it revealed that Fiber Optic customers have a higher churn rate of 40.7% compared to those without this internet. There is a significant difference in Fiber Optic and churn rates. To add on, I found a strong relationship between them. This brings up the possibility that it may be due to price, service, or competition. I would suggest to study performance and pricing as well as marketing strategy to improve this.</p></section><section class="panel"><h2>1. IMPORT THE DATA </h2><h3>1A. Import Packages &amp; Set Style</h3></section><section class="panel"><pre><code>import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from statsmodels.stats.proportion import proportions_ztest</code></pre></section><section class="panel"><pre><code>sns.set(style=&quot;whitegrid&quot;)</code></pre></section><section class="panel"><h3>1B. Import the Data</h3></section><section class="panel"><pre><code>df = pd.read_csv(&#x27;customer-churn.csv&#x27;)
+df.head()</code></pre><div class="table-scroll"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>customer_id</th>
+      <th>customer_id.1</th>
+      <th>count</th>
+      <th>gender</th>
+      <th>age</th>
+      <th>under_30</th>
+      <th>senior_citizen</th>
+      <th>married</th>
+      <th>dependents</th>
+      <th>number_of_dependents</th>
+      <th>...</th>
+      <th>payment_method</th>
+      <th>monthly_charge</th>
+      <th>total_charges</th>
+      <th>total_refunds</th>
+      <th>total_extra_data_charges</th>
+      <th>total_long_distance_charges</th>
+      <th>total_revenue</th>
+      <th>tenure_in_days</th>
+      <th>churn_label</th>
+      <th>Unnamed: 32</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>8779QRDMV</td>
+      <td>8779QRDMV</td>
+      <td>1</td>
+      <td>Male</td>
+      <td>78</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>No</td>
+      <td>0</td>
+      <td>...</td>
+      <td>Bank Withdrawal</td>
+      <td>39.65</td>
+      <td>39.65</td>
+      <td>0.00</td>
+      <td>20</td>
+      <td>0.00</td>
+      <td>59.65</td>
+      <td>31</td>
+      <td>Yes</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>7495OOKFY</td>
+      <td>7495OOKFY</td>
+      <td>1</td>
+      <td>Female</td>
+      <td>74</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>1</td>
+      <td>...</td>
+      <td>Credit Card</td>
+      <td>80.65</td>
+      <td>633.30</td>
+      <td>0.00</td>
+      <td>0</td>
+      <td>390.80</td>
+      <td>1024.10</td>
+      <td>244</td>
+      <td>Yes</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1658BYGOY</td>
+      <td>1658BYGOY</td>
+      <td>1</td>
+      <td>Male</td>
+      <td>71</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>3</td>
+      <td>...</td>
+      <td>Bank Withdrawal</td>
+      <td>95.45</td>
+      <td>1752.55</td>
+      <td>45.61</td>
+      <td>0</td>
+      <td>203.94</td>
+      <td>1910.88</td>
+      <td>519</td>
+      <td>Yes</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4598XLKNJ</td>
+      <td>4598XLKNJ</td>
+      <td>1</td>
+      <td>Female</td>
+      <td>78</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>1</td>
+      <td>...</td>
+      <td>Bank Withdrawal</td>
+      <td>98.50</td>
+      <td>2514.50</td>
+      <td>13.43</td>
+      <td>0</td>
+      <td>494.00</td>
+      <td>2995.07</td>
+      <td>762</td>
+      <td>Yes</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>4846WHAFZ</td>
+      <td>4846WHAFZ</td>
+      <td>1</td>
+      <td>Female</td>
+      <td>80</td>
+      <td>No</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>Yes</td>
+      <td>1</td>
+      <td>...</td>
+      <td>Bank Withdrawal</td>
+      <td>76.50</td>
+      <td>2868.15</td>
+      <td>0.00</td>
+      <td>0</td>
+      <td>234.21</td>
+      <td>3102.36</td>
+      <td>1127</td>
+      <td>Yes</td>
+      <td>True</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 33 columns</p>
+</div></div></section><section class="panel"><h2>2. PERFORM A HYPOTHESIS TEST</h2></section><section class="panel"><h3>2A. Prepare the Data (truth table)</h3></section><section class="panel"><pre><code>under_30_gb = df.groupby([&#x27;under_30&#x27;, &#x27;churn_label&#x27;]).customer_id.count().unstack()
+
+under_30_gb[&#x27;total_count&#x27;] = under_30_gb.sum(axis=1)
+under_30_gb[&#x27;proportion_churned&#x27;] = under_30_gb[&#x27;Yes&#x27;] / under_30_gb[&#x27;total_count&#x27;]
+
+under_30_gb
+</code></pre><div class="table-scroll"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>churn_label</th>
+      <th>No</th>
+      <th>Yes</th>
+      <th>total_count</th>
+      <th>proportion_churned</th>
+    </tr>
+    <tr>
+      <th>under_30</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>No</th>
+      <td>4077</td>
+      <td>1564</td>
+      <td>5641</td>
+      <td>0.277256</td>
+    </tr>
+    <tr>
+      <th>Yes</th>
+      <td>1097</td>
+      <td>304</td>
+      <td>1401</td>
+      <td>0.216988</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></section><section class="panel"><h3>2B. State Your Hypotheses</h3><p><strong>Null Hypothesis:</strong> There is no difference in churn rate between customers under 30 and customers 30 or older</p><p><strong>Alternative Hypothesis:</strong> Customers under 30 churn at a higher rate than those 30 and over</p></section><section class="panel"><h3>2C. Perform the Hypothesis Test</h3></section><section class="panel"><pre><code>successes = [under_30_gb.loc[&#x27;Yes&#x27;, &#x27;Yes&#x27;], under_30_gb.loc[&#x27;No&#x27;, &#x27;Yes&#x27;]]
+nobs = [under_30_gb.loc[&#x27;Yes&#x27;, &#x27;total_count&#x27;], under_30_gb.loc[&#x27;No&#x27;, &#x27;total_count&#x27;]]
+
+z_stat, p_value = proportions_ztest(successes, nobs)
+
+print(f&quot;Z-statistic: {z_stat}&quot;)
+print(f&quot;P-value: {p_value}&quot;)</code></pre><pre class="output">Z-statistic: -4.5733014216894095
+P-value: 4.800986893226653e-06
+</pre></section><section class="panel"><p><strong>Description of findings:</strong> There is a significant difference in churn rate between customers under 30 than those 30 and over because the p-value is greater than 0.05. Reject the null hypthoesis. However, customers 30 and over have a higher chrun rate of 27.7% than under 30 which is 21.7%. </p></section><section class="panel"><h2>3. PERFORM TWO MORE HYPOTHESIS TESTS</h2></section><section class="panel"><h3>3A. Hypothesis Test with a Two-Value Categorical Variable</h3><p><strong>Null Hypothesis:</strong> There is no difference in churn rate between customers with unlimited data and those without.</p><p><strong>Alternative Hypothesis:</strong> Customers with unlimited data churn higher rate than those without. </p></section><section class="panel"><pre><code>#truth table here
+unlimited_data_gb = df.groupby([&#x27;unlimited_data&#x27;, &#x27;churn_label&#x27;]).size().unstack()
+
+unlimited_data_gb.columns = [&#x27;No&#x27;, &#x27;Yes&#x27;]
+
+unlimited_data_gb[&#x27;total_count&#x27;] = unlimited_data_gb[&#x27;No&#x27;] + unlimited_data_gb[&#x27;Yes&#x27;]
+unlimited_data_gb[&#x27;proportion_churned&#x27;] = unlimited_data_gb[&#x27;Yes&#x27;] / unlimited_data_gb[&#x27;total_count&#x27;]
+
+unlimited_data_gb</code></pre><div class="table-scroll"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>No</th>
+      <th>Yes</th>
+      <th>total_count</th>
+      <th>proportion_churned</th>
+    </tr>
+    <tr>
+      <th>unlimited_data</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>No</th>
+      <td>1931</td>
+      <td>367</td>
+      <td>2298</td>
+      <td>0.159704</td>
+    </tr>
+    <tr>
+      <th>Yes</th>
+      <td>3243</td>
+      <td>1501</td>
+      <td>4744</td>
+      <td>0.316400</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></section><section class="panel"><pre><code>#hypothesis test here
+successes = [unlimited_data_gb.loc[&#x27;Yes&#x27;, &#x27;Yes&#x27;], unlimited_data_gb.loc[&#x27;No&#x27;, &#x27;Yes&#x27;]]
+nobs = [unlimited_data_gb.loc[&#x27;Yes&#x27;, &#x27;total_count&#x27;], unlimited_data_gb.loc[&#x27;No&#x27;, &#x27;total_count&#x27;]]
+
+z_stat, p_value = proportions_ztest(successes, nobs)
+
+print(f&quot;Z-statistic: {z_stat}&quot;)
+print(f&quot;P-value: {p_value}&quot;)</code></pre><pre class="output">Z-statistic: 13.96530545689303
+P-value: 2.5381490981985927e-44
+</pre></section><section class="panel"><p><strong>Description of findings:</strong> There is a significant difference in churn rate between customers with unlimited data than those with without because the p-value is greater than 0.05. Reject the null hypothesis. However, customers with unlimited data plans have a higher churn rate of 31.6% versus those without which is 16%. </p></section><section class="panel"><h3>3B. Hypothesis Test with a 3+ Value Categorical Variable</h3><p><strong>Null Hypothesis:</strong> There is no difference in churn rate between customers with Fiber Optic internet and those without Fiber Optic internet.</p><p><strong>Alternative Hypothesis:</strong> Customers with Fiber Optic internet churn at a higher rate than those without Fiber Optic internet. </p></section><section class="panel"><pre><code>#new column added here
+df[&#x27;internet_type_grouped&#x27;] = df[&#x27;internet_type&#x27;].apply(lambda x: &#x27;Fiber Optic&#x27; if x == &#x27;Fiber Optic&#x27; else &#x27;Not Fiber Optic&#x27;)</code></pre></section><section class="panel"><pre><code>#truth table here
+internet_type_gb = df.groupby([&#x27;internet_type_grouped&#x27;, &#x27;churn_label&#x27;]).size().unstack()
+
+internet_type_gb.columns = [&#x27;No&#x27;, &#x27;Yes&#x27;]
+
+internet_type_gb[&#x27;total_count&#x27;] = internet_type_gb[&#x27;No&#x27;] + internet_type_gb[&#x27;Yes&#x27;]
+internet_type_gb[&#x27;proportion_churned&#x27;] = internet_type_gb[&#x27;Yes&#x27;] / internet_type_gb[&#x27;total_count&#x27;]
+
+internet_type_gb</code></pre><div class="table-scroll"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>No</th>
+      <th>Yes</th>
+      <th>total_count</th>
+      <th>proportion_churned</th>
+    </tr>
+    <tr>
+      <th>internet_type_grouped</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Fiber Optic</th>
+      <td>1799</td>
+      <td>1235</td>
+      <td>3034</td>
+      <td>0.407053</td>
+    </tr>
+    <tr>
+      <th>Not Fiber Optic</th>
+      <td>3375</td>
+      <td>633</td>
+      <td>4008</td>
+      <td>0.157934</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></section><section class="panel"><pre><code>#hypothesis test here
+successes = [internet_type_gb.loc[&#x27;Fiber Optic&#x27;, &#x27;Yes&#x27;], internet_type_gb.loc[&#x27;Not Fiber Optic&#x27;, &#x27;Yes&#x27;]]
+nobs = [internet_type_gb.loc[&#x27;Fiber Optic&#x27;, &#x27;total_count&#x27;], internet_type_gb.loc[&#x27;Not Fiber Optic&#x27;, &#x27;total_count&#x27;]]
+
+z_stat, p_value = proportions_ztest(successes, nobs)
+
+print(f&quot;Z-statistic: {z_stat}&quot;)
+print(f&quot;P-value: {p_value}&quot;)</code></pre><pre class="output">Z-statistic: 23.44905349992068
+P-value: 1.3516273236794738e-121
+</pre></section><section class="panel"><p><strong>Description of findings:</strong> There is a significant difference in churn rate between customers with Fiber Optic internet than customers without Fiber Optic internet because the p-value is greater than 0.05. Reject the null hypothesis. There is a strong relationship with internet type and churn rate. Fiber Optic customers have 40.7% higher churn rate compared to non-Fiber customers of 15.8%.</p></section></main></body></html>
