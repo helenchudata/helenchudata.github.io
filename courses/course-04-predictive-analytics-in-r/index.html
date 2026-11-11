@@ -19,19 +19,110 @@
     <a href="#project">Data and Methods</a>
     <a href="#findings">Observed Survival by Ticket Class</a>
     <a href="#visualizations">R Visualizations</a>
-    <a href="#modeling">Modeling and Validation</a>
+    <a href="#modeling">Logistic Regression</a>
+    <a href="#model-comparison">Model Comparison with caret</a>
     <a href="https://public.tableau.com/app/profile/helen.chu6052/vizzes">Tableau Public</a>
   </nav>
   <main>
     <section class="panel" id="project-summary">
       <h2>Project Summary</h2>
       <h3>Titanic Passenger Survival</h3>
-      <p>I explored records for 891 passengers in R, checked for missing values, and compared observed survival by ticket class and sex. Survival in the sample was about 63% in first class and 24% in third class. I then submitted survival predictions to Kaggle, where the submission received a public score of 0.76555.</p>
+      <p>I explored records for 891 passengers in R, checked for missing values, and compared observed survival by ticket class and sex. Survival in the sample was about 63% in first class and 24% in third class. I fit logistic models, compared classifiers with caret, and submitted survival predictions to Kaggle, where the submission received a public score of 0.76555.</p>
     </section>
 <section class="panel learning-panel" id="skills-and-learning"><h2>Skills and What I Learned</h2><ul class="skill-tags" aria-label="Project skills"><li>R</li><li>Exploratory analysis</li><li>Regression</li><li>Predictive evaluation</li></ul><p>I learned to inspect missing values, distinguish descriptive survival rates from predictive performance, and interpret a public Kaggle score in the context of the evaluated sample.</p></section>
     <section class="panel" id="project">
-      <h2>Data and Methods</h2>
+      <h2>Part 1 · Descriptive Analysis and Visualization</h2>
       <p>I used descriptive statistics and exploratory regressions to examine how age, ticket class, and sex relate to fare. The data review flagged missing age and cabin values, which matter when choosing variables and preparing data for prediction.</p>
+      <p><a href="artifacts/titanic-part-1-descriptives.zip" download>Download the R script, data, and charts (ZIP)</a></p>
+      <details>
+        <summary>View the descriptive analysis code</summary>
+        <pre><code>library(readr)
+boat &lt;- read_csv(&quot;titanic.csv&quot;)
+summary(boat)
+head(boat)
+tail(boat,10)
+summary(boat$Fare)
+mean(boat$Fare)
+sd(boat$Fare)
+var(boat$Fare)
+
+#Scatterplot 1, Age vs. Fare
+cor(boat$Age,boat$Fare)
+aggregate(Age~Survived,boat,mean)
+plot(boat$Age,boat$Fare)
+plot(Fare~Age,data=boat)
+plot(Fare~Age,data=boat,xlab=&quot;Age&quot;, ylab=&quot;Fare&quot;,main=&quot;boat&quot;)
+plot(Fare~Age,data=boat,xlab=&quot;Age&quot;, ylab=&quot;Fare&quot;,main=&quot;Age vs. Fare&quot;,cex.lab=.75)
+plot(Fare[which(boat$Survived==0)]~Age[which(boat$Survived==0)],data=boat,
+     xlab=&quot;Age&quot;, ylab=&quot;Fare&quot;,main=&quot;Age vs. Fare&quot;,
+     cex.lab=.75)
+par(new=T)
+plot(Fare[which(boat$Survived==1)]~Age[which(boat$Survived==1)],data=boat,
+     col=&quot;red&quot;,xlab=&quot;Age&quot;, ylab=&quot;Fare&quot;,main=&quot;Age vs. Fare&quot;,
+     cex.lab=.75)
+plot(Fare[which(boat$Survived==1)]~Age[which(boat$Survived==1)],data=boat,
+     col=&quot;red&quot;,xlab=&quot;Age&quot;, ylab=&quot;Fare&quot;,main=&quot;Age vs. Fare&quot;,
+     cex.lab=.75)
+par(new=T)
+plot(Fare[which(boat$Survived==0)]~Age[which(boat$Survived==0)],data=boat,
+     xlab=&#x27;&#x27;, ylab=&#x27;&#x27;, axes=F,
+     cex.lab=.75)
+abline(lm(boat$Fare~boat$Age), col=&quot;darkgreen&quot;)
+
+#Scatterplot 2, Ticket Class vs. Fare
+cor(boat$Pclass,boat$Fare)
+aggregate(Survived~Pclass,boat,mean)
+plot(boat$Pclass,boat$Fare)
+plot(Fare~Pclass,data=boat)
+plot(Fare~Pclass,data=boat,xlab=&quot;Ticket Class&quot;, ylab=&quot;Fare&quot;,main=&quot;Ticket Class vs. Fare&quot;)
+plot(Fare~Pclass,data=boat,xlab=&quot;Ticket Class&quot;, ylab=&quot;Fare&quot;,main=&quot;Ticket Class vs. Fare&quot;,cex.lab=.75)
+plot(Fare[which(boat$Survived==0)]~Pclass[which(boat$Survived==0)],data=boat,
+     xlab=&quot;Ticket Class&quot;, ylab=&quot;Fare&quot;,main=&quot;Ticket Class vs. Fare&quot;,
+     cex.lab=.75)
+par(new=T)
+plot(Fare[which(boat$Survived==1)]~Pclass[which(boat$Survived==1)],data=boat,
+     col=&quot;red&quot;,xlab=&quot;Ticket Class&quot;, ylab=&quot;Fare&quot;,main=&quot;Ticket Class vs. Fare&quot;,
+     cex.lab=.75)
+plot(Fare[which(boat$Survived==1)]~Pclass[which(boat$Survived==1)],data=boat,
+     col=&quot;red&quot;,xlab=&quot;Ticket Class&quot;, ylab=&quot;Fare&quot;,main=&quot;Ticket Class vs. Fare&quot;,
+     cex.lab=.75)
+par(new=T)
+plot(Fare[which(boat$Survived==0)]~Pclass[which(boat$Survived==0)],data=boat,
+     xlab=&#x27;&#x27;, ylab=&#x27;&#x27;, axes=F,
+     cex.lab=.75)
+abline(lm(boat$Fare~boat$Pclass), col=&quot;darkgreen&quot;)
+
+#Boxplot 1, Sex vs. Fare
+aggregate(Survived~Sex,boat,mean)
+summary(boat$Fare)
+boxplot(boat$Fare)
+boxplot(boat$Fare~boat$Sex)
+boxplot(boat$Fare~boat$Sex,xlab=&quot;Sex&quot;,ylab=&quot;Fare&quot;,main=&quot;Titanic&quot;, 
+        cex.axis=0.75)
+boxplot(Fare~Sex,data=boat,
+        col=(c(&quot;#5b85e7&quot;,&quot;#b32025&quot;)),
+        names=c(&quot;Female&quot;,&quot;Male&quot;))
+legend(&quot;topright&quot;,legend=c
+       (&quot;Female&quot;,&quot;Male&quot;),pch=c(19,19),
+       col=(c(&quot;#5b85e7&quot;,&quot;#b32025&quot;)),cex=.75)
+
+boatLM&lt;-lm(boat$Fare~boat$Age)
+summary(boatLM)
+coef(boatLM)
+summary(boatLM)$r.squared
+
+boatLM2&lt;-lm(boat$Fare~boat$Pclass)
+summary(boatLM2)
+coef(boatLM2)
+summary(boatLM2)$r.squared
+
+boatLM3&lt;-lm(boat$Fare~boat$Sex)
+summary(boatLM3)
+coef(boatLM3)
+summary(boatLM3)$r.squared
+
+</code></pre>
+      </details>
     </section>
     <section class="panel" id="findings">
       <h2>Observed Survival by Ticket Class</h2>
@@ -53,11 +144,141 @@
           <img src="artifacts/titanic-ticket-class-and-fare.png" width="525" height="392" loading="lazy" alt="Fare by ticket class, with the highest fares appearing in first class.">
           <figcaption>First-class passengers generally paid higher fares.</figcaption>
         </figure>
+        <figure class="project-figure">
+          <img src="artifacts/titanic-sex-and-fare.jpg" loading="lazy" alt="Box plots comparing fare distributions by sex.">
+          <figcaption>The R box plot compares fares by sex and shows high-fare outliers in both groups.</figcaption>
+        </figure>
       </div>
     </section>
     <section class="panel" id="modeling">
-      <h2>Modeling and Validation</h2>
+      <h2>Part 2 · Logistic Regression and Kaggle</h2>
       <p>For the predictive stage, I submitted survival predictions to Kaggle. The submission recorded a public score of <strong>0.76555</strong> (about 76.6% accuracy on the public scoring subset).</p>
+      <p>The script starts with a sex-only logistic regression, checks missing ages and embarkation values, and fits a second model that adds ticket class, age, family counts, and fare. The accuracy calculation uses the training data. The draft export still uses the binary predictions from the sex-only baseline after computing the second model’s probabilities.</p>
+      <p><a href="artifacts/titanic-part-2-logistic-regression.zip" download>Download the regression scripts and data (ZIP)</a></p>
+      <details>
+        <summary>View the logistic regression code</summary>
+        <pre><code>library(readr)
+boat&lt;- read_csv(&quot;train.csv&quot;)
+boat$Survived&lt;-as.factor(boat$Survived)
+boatLR&lt;-glm(Survived~Sex,family=binomial(),data=boat)
+summary(boatLR)
+
+#Checked missing values in age column
+sum(is.na(boat$Age))
+boat$AgeAVG&lt;-boat$Age
+boat$AgeAVG[is.na(boat$AgeAVG)]&lt;-mean(boat$AgeAVG,na.rm=TRUE)
+
+#Replaced missing embarked values with the most frequent category
+sum(is.na(boat$Embarked))
+table(boat$Embarked)
+boat&lt;-within(boat,Embarked[is.na(Embarked)]&lt;-&quot;S&quot;)
+
+
+boattest&lt;- read_csv(&quot;test.csv&quot;)
+boattest$survive.prod&lt;-predict(boatLR,boattest,type=&quot;response&quot;)
+boattest$survive&lt;-round(boattest$survive.prod)
+View(boattest)
+
+sum(is.na(boattest$Age))
+boattest$AgeAVG&lt;-boattest$Age
+boattest$AgeAVG[is.na(boattest$AgeAVG)]&lt;-mean(boattest$AgeAVG,na.rm=TRUE)
+
+sum(is.na(boattest$Embarked))
+table(boattest$Embarked)
+boattest&lt;-within(boattest,Embarked[is.na(Embarked)]&lt;-&quot;S&quot;)
+
+#Added logistic regression model
+boatLR2&lt;-glm(Survived~Sex+Pclass+AgeAVG+SibSp+Parch+Fare,family=binomial(),data=boat)
+summary(boatLR2)
+boat.prob&lt;-predict(boatLR2,boat,type=&quot;response&quot;)
+table(boat$Survived,boat.prob&gt;.5)
+CF&lt;-table(boat$Survived,boat.prob&gt;.5)
+
+#Checked for accuracy
+Accuracy&lt;-(CF[2,2]+CF[1,1])/nrow(boat)
+Accuracy
+
+boattest$survive.prod&lt;-predict(boatLR2,boattest,type=&quot;response&quot;)
+
+
+submission &lt;- c()
+submission$PassengerID &lt;-boattest$PassengerId
+submission$Survived &lt;-boattest$survive
+write.csv(submission, file = &quot;submission.csv&quot;)
+
+</code></pre>
+      </details>
+    </section>
+    <section class="panel" id="model-comparison">
+      <h2>Part 3 · Compare Models with caret</h2>
+      <p>I used an 80/20 split to evaluate k-nearest neighbors and a classification tree on held-out labels. The tree uses 10-fold cross-validation and Kappa for model selection. The included Kaggle submission uses predictions from the logistic regression in the comparison script.</p>
+      <p><a href="artifacts/titanic-part-3-caret-model-comparison.zip" download>Download the caret scripts, data, and submission CSV (ZIP)</a></p>
+      <details>
+        <summary>View the caret model comparison code</summary>
+        <pre><code>library(readr)
+library(caTools)
+library(FNN)
+library(tree)
+library(kernlab)
+library(neuralnet)
+library(caret)
+boat&lt;- read_csv(&quot;train.csv&quot;)
+boat$Survived&lt;-as.factor(boat$Survived)
+
+head(boat)
+summary(boat)
+View(boat)
+
+#for checking the variable Age for missing variables and replacing them with the mean Age.
+boat&lt;-within(boat,Age[is.na(Age)]&lt;-mean(Age,na.rm=TRUE))
+
+boattest&lt;- read_csv(&quot;test.csv&quot;)
+View(boattest)
+
+boattest&lt;-within(boattest,Age[is.na(Age)]&lt;-mean(Age,na.rm=TRUE))
+
+#set random seed. 
+set.seed(123) 
+
+#use the sample() function to split the data into 80% train, 20% test.
+sample&lt;- sample.split(boat$Survived, SplitRatio = .80)
+train&lt;- subset(boat, sample == TRUE)
+test&lt;- subset(boat, sample == FALSE)
+
+#add logistic regression model.
+boatLR&lt;-glm(Survived~Sex+Age+SibSp+Parch,family=binomial(),data=boat)
+summary(boatLR)
+
+#use the train() function in caret to tune k-nearest neighbors.
+Model&lt;-train(Survived~Sex+Age+SibSp+Parch,data = train, method = &quot;knn&quot;)
+Model
+Model$finalModel
+
+#calculate RMSE - using predict() and postResample().
+test_PR&lt;-predict(Model,test)
+postResample(pred = test_PR, obs = test$Survived)
+
+#change control options bootstrapping to cross-validation.
+trControlOptions&lt;-trainControl(method=&quot;cv&quot;,number=10,selectionFunction =&quot;best&quot;)
+
+#call regression tree and optimize over in kappa.
+Model&lt;-train(Survived~Sex+Age+SibSp+Parch,data=train,method=&quot;rpart&quot;,trControl=trControlOptions,metric=&quot;Kappa&quot;)
+table(predict(Model,boat),boat$Survived)
+Model$finalModel
+
+#calculate RMSE - using predict() and postResample().
+test_PR&lt;-predict(Model,test)
+postResample(pred = test_PR, obs = test$Survived)
+
+boattest$survive.prod&lt;-predict(boatLR,boattest,type=&quot;response&quot;)
+boattest$survive&lt;-round(boattest$survive.prod)
+View(boattest)
+
+submission &lt;- c()
+submission$PassengerID &lt;-boattest$PassengerId
+submission$Survived &lt;-boattest$survive
+write.csv(submission, file = &quot;submission.csv&quot;)</code></pre>
+      </details>
     </section>
   </main>
   <footer><a href="../../index.html#projects">Explore all projects</a></footer>

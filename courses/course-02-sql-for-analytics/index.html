@@ -17,6 +17,9 @@
     <a href="../../index.html#projects">All Projects</a>
     <a href="#project-summary">Project Summary</a><a href="#skills-and-learning">Skills and Learning</a>
     <a href="#approach">Findings from the Schema Review</a>
+    <a href="#part-1">Data Impressions</a>
+    <a href="#part-2">Data Reports</a>
+    <a href="#part-3">Normalizing Data</a>
     <a href="#artifacts">Project Materials</a>
   </nav>
   <main>
@@ -24,7 +27,7 @@
       <h2>Project Summary</h2>
       <h3>LetsMeet Membership and Event Analysis</h3>
       <p>LetsMeet is a fictional platform that helps people find local groups and attend events in New York, Chicago, and San Francisco. The project reviews its six-table relational database to understand how Sales, Engineering, and leadership could report on membership, event activity, and venue use.</p>
-      <p>I reviewed the table definitions and sample records, identified what each row represents, and traced how groups connect memberships, events, categories, and cities. I then identified reporting questions the schema supports and checks needed before comparing results.</p>
+      <p>I reviewed the table definitions and sample records, identified what each row represents, and traced how groups connect memberships, events, categories, and cities. I then wrote MySQL queries to explore membership, report on events and growth, and restructure the membership data.</p>
     </section>
 <section class="panel learning-panel" id="skills-and-learning"><h2>Skills and What I Learned</h2><ul class="skill-tags" aria-label="Project skills"><li>MySQL</li><li>Relational schemas</li><li>Data modeling</li><li>Reporting requirements</li></ul><p>The LetsMeet schema helped me understand how related tables support reporting. A member can appear in several groups, so counting membership rows and counting distinct people answer different questions.</p></section>
     <section class="panel" id="approach">
@@ -35,10 +38,493 @@
         <li><strong>RSVPs and headcount describe different aspects of engagement.</strong> The event table lists yes RSVPs, maybe RSVPs, waitlist counts, and headcount separately. Confirming how each field is recorded would help distinguish interest from attendance.</li>
         <li><strong>City and venue data support local reporting.</strong> Venue addresses and coordinates help locate events. The case study flags the city table for cleaning, so I would validate city records and group-to-city matches before comparing markets.</li>
       </ul>
-      <p>These findings describe what the schema and sample records support. Measuring activity by city or category would require querying the full dataset.</p>
+      <p>The three project parts below show how the SQL labs applied this schema to reporting and database design. The figures come from the saved lab notes.</p>
+    </section>
+    <section class="panel" id="part-1">
+      <h2>Part 1 · Data Impressions</h2>
+      <p>I explored active cities, group access rules, categories, and venues. My lab notes record 39,980 distinct members, with 21.19% associated with Chicago in the membership records. The venue query reported 518 venue records for New York.</p>
+      <details>
+        <summary>Sales insights</summary>
+        <p><a href="artifacts/part-1/sales-insights.sql" download>Download sales insights (.sql)</a></p>
+        <pre><code>-- Answer the questions from the Sales team in this file.
+
+
+-- Active Cities
+SELECT 
+    DISTINCT city
+FROM grp_member
+WHERE member_status = &quot;active&quot;;
+
+SELECT 
+    DISTINCT city,
+    state
+FROM city 
+WHERE city NOT IN
+	(SELECT 
+		DISTINCT city
+	FROM grp_member
+	WHERE member_status = &quot;active&quot;);
+
+/*What cities have active members?
+Are there any cities listed in the city table with no active memebers? If so, what state are those cities in?
+
+LetsMeet have active members within many cities. Active members are located in San Francisco, New York, Chicago, West New York, West Chicago, South San Francisco, North Chicago, Chicago Heights, East Chicago, Chicago Ridge.
+However, there are some cities listed on here with no active members. Cities and states with no active members include New York Mills, New York, New York Mills, Minnesota, as well as Chicago Park, California. 
+The number of cities with no active members would be considered relatively small if you&#x27;re comparing to the number of cities with active members.
+*/
+
+-- Groups
+SELECT 
+	join_mode,
+    COUNT(*)
+FROM grp
+GROUP BY join_mode;
+
+/*How many groups are currently open, waiting for approval, and/or closed?
+
+LetsMeet is made up of many groups. There are 3602 groups that are open, 723 wating for approval, and 15 groups that are closed. 
+LetsMeet can be considered successful as there are more groups that are currently open than closed.*/
+
+-- Categories
+SELECT
+	category.category_id,
+    category_name,
+    COUNT(group_name) AS total_categories
+FROM category
+JOIN grp ON category.category_id = grp.category_id
+GROUP BY category_name
+ORDER BY total_categories DESC
+LIMIT 5;
+
+SELECT
+	category.category_id,
+    category_name,
+    COUNT(group_name) AS total_categories
+FROM category
+JOIN grp ON category.category_id = grp.category_id
+GROUP BY category_name
+ORDER BY total_categories 
+LIMIT 5;
+
+/*What are the five categories that contain the most groups? 
+What are the five categories that contain the least number of groups?
+
+LetsMeet have many categories of groups. Tech, Career &amp; Business, Socializing, Health &amp; Wellbeing, and Language &amp; Ethnic Identity are the five categories that contain the most groups.
+Whereas, Paranormal, Cars &amp; Motorcycles, Sci-Fi &amp; Fantasy, Lifestyle, and Hobbies &amp; Crafts are the five categories that contain the least number of groups.
+Tech, Career &amp; Business, Socializing, Health &amp; Wellbeing, and Language &amp; Ethnic Identity could be considered as more popular amoung LetsMeet users compared to the categories with the least amount of groups.*/
+
+-- Members
+SELECT 
+    COUNT(DISTINCT member_id) AS total_members
+FROM grp_member;
+
+SELECT 
+    (SELECT 
+            COUNT(DISTINCT member_id)
+        FROM grp_member
+        WHERE city = &#x27;Chicago&#x27;) / (SELECT COUNT(DISTINCT member_id)
+        FROM grp_member) * 100 AS chicago_percentage
+        	
+/*How many members are there?
+What percentage of members are in Chicago?
+
+There are 39980 members using LetsMeet.
+Of those members, 21.19% of them are members in Chicago.
+This is less than a quarter of the total of LetsMeet users. 
+This could indicate there are a lot more other members in different cities outside of Chicago.*/</code></pre>
+      </details>
+      <details>
+        <summary>Additional insights</summary>
+        <p><a href="artifacts/part-1/additional-insights.sql" download>Download additional insights (.sql)</a></p>
+        <pre><code>-- Venue_
+SELECT
+	city.city,
+    COUNT(venue_name) AS total_venues
+FROM city
+JOIN venue_ ON city.city = venue_.city
+GROUP BY city_id
+ORDER BY COUNT(venue_name) DESC;
+
+/* Which city has the most venues?
+
+The city with the most venues is New York.
+New York has in total 518 venues.
+New York hosts the most LetsMeet events compared to Chicago, San Francisco, and South San Francisco */
+
+-- Grp
+SELECT 
+	group_name,
+	created,
+    join_mode,
+    rating,
+    members
+FROM grp
+ORDER BY created
+LIMIT 1;
+
+/*What is the longest running group on LetsMeet? 
+How many members do they have?
+
+The longest running group of LetsMeet is New York City Poker Group.
+New York City Poker Group has a total of 1797 members.
+New York City Poker Group was created in 2002-10-08 17:22:15 and is 15 years older than the newest group that was created.*/
+
+-- Grp_member
+SELECT 	
+	DISTINCT member_name,
+    joined,
+    member_status
+FROM grp_member
+WHERE member_status = &quot;active&quot;
+ORDER BY joined
+LIMIT 1;
+
+SELECT
+	member_name,
+    COUNT(*) AS total_groups
+FROM grp_member
+GROUP BY member_name
+ORDER BY total_groups DESC
+LIMIT 1;
+
+/* Who was the first LetsMeet member that is still active? What member is a part of the most groups?
+
+The first LetsMeet member that is still active is Christine.
+THe member that is part of the most groups is Michael.
+Michael is in 350 groups meanwhile Christine is in 32 groups. 
+There is no relationship between the duration of the member&#x27;s active status to the number of groups a member is in.*/
+
+-- City
+SELECT
+*
+FROM city
+ORDER BY ranking DESC;
+
+/*What is the ranking column? Is it providing any additional useful information about cities?
+
+The ranking column may be data on each city&#x27;s ranking. 
+However, there is not enough information to draw analytical conclusions from this column.*/
+
+-- Event
+SELECT 
+	event.venue_id,
+    venue_name,
+    city,
+    COUNT(venue_name) AS total_events
+FROM event
+JOIN venue_ ON event.venue_id = venue_.venue_id
+GROUP BY venue_name
+ORDER BY total_events DESC;
+
+/*Which venue is the most popular and how many events were held there?
+
+The Ainsworth, Leela, and Studio 302 are the most popular venue.
+There were 370 events held at The Ainsworth.
+The Ainsworth is located in New York. Earlier we found that New York has the most venues. 
+In continuation, The Ainsworth venue in particular has host the most events and is popular 
+compared to the rest of the venues.*/
+
+-- Category
+SELECT
+    category.category_name,
+    COUNT(DISTINCT grp_member.member_id) AS total_members
+    FROM category
+JOIN grp ON category.category_id = grp.category_id
+JOIN grp_member ON grp.group_id = grp_member.group_id
+GROUP BY category_name
+ORDER BY total_members DESC;
+  
+/*How can you combine the category data with other data to determine the most popular categories 
+based on distinct member_id count?
+
+To find the category data with other data to determine the most popular categories based on distinct member_id count
+you can use JOIN to join the category table with other tables with foreign keys.
+This involves the tables category, grp, and grp_member.
+Tech is the most popular category with a total of 11115 members*/</code></pre>
+      </details>
+    </section>
+    <section class="panel" id="part-2">
+      <h2>Part 2 · Data Reports</h2>
+      <p>I counted events with “Toastmaster” in the event name, examined first recorded join dates, and recommended five groups for a marketing campaign. The report records 1,117 matching events, including 986 in Chicago, 124 in New York, and 7 in San Francisco. It also notes that the year-over-year increase in new members narrowed from 4,452 between 2014 and 2015 to 363 between 2016 and 2017.</p>
+      <details>
+        <summary>Summary report</summary>
+        <p><a href="artifacts/part-2/summary-report.sql" download>Download summary report (.sql)</a></p>
+        <pre><code>-- Summary of Findings
+-- Use this file to summarize your findings and make your recommendations where they have been requested.
+-- Any recommendations should include the data to support why you are making that recommendation
+
+-- 1. How many Toastmasters events are there using LetsMeet in New York, Chicago and San Francisco?
+/*
+- There are 1117 Toastmasters events in total.
+- In New York there are 124 Toastmasters events.
+- In Chicago there are 986 Toastmasters events.
+- In San Francisco there are 7 Toastmasters events.
+- Chicago hosts the most Toastmasters events using LetsMeet in comparison to New York and San Francisco.
+*/
+
+-- 2. Is LetsMeet membership leveling off?
+/*
+- LetsMeet is increasing their number of members joined every year. Although, the rate of members joining
+ throughout the recent year to year have been decreasing.
+- From the year 2016 to 2017, the difference between the total amount of members joined was 363.
+- From the year 2015 to 2016, the difference between the total amount of members joined was 1900.
+- From the year 2014 to 2015, the difference between the total amount of members joined was 4452.
+- In 2007, the month of January had the most amount of members joined which totaled to 1131 members.
+- In 2007, the month of December had the least amount of members joined with 12 members only.
+- There may be a possibility there was a deletion anomaly or data error that occurred.
+*/
+
+-- 3. What five groups should marketing feature in their upcoming campaign?*
+/*
+- Among the five groups, New York appears to be the most popular city. 
+- The five groups deem to have the most number of members and a rating of 5.
+-The total amount of groups with 5 star ratings is 745.
+- Of the groups that have been rated, 2.67% were rated 5.
+- The groups offer a variety of categories including Art &amp; Culture, Food &amp; Drink, Photography, Socializing, and
+Hobbies &amp; Crafts.
+- NYC Art Meet Up, NYC Local Singles and Professionals Get Together, New York Travel Photography,
+Chicago Young Professionals, and Create and Chat are the groups that should be featured in the upcoming campaign.
+*/</code></pre>
+      </details>
+      <details>
+        <summary>Toastmasters events</summary>
+        <p><a href="artifacts/part-2/toastmasters-events.sql" download>Download toastmasters events (.sql)</a></p>
+        <pre><code>-- The total numbers of Toastmasters events on LetsMeet
+SELECT 
+	*
+FROM event
+WHERE LOWER(event_name) LIKE &quot;%toastmaster%&quot;;
+
+SELECT 
+	COUNT(event_id) AS total_events
+FROM event
+WHERE LOWER(event_name) LIKE &quot;%toastmaster%&quot;;
+
+-- Toastmasters events alongside the cities hosted
+SELECT
+	event_name,
+    city
+FROM event
+JOIN grp ON event.group_id = grp.group_id
+JOIN city ON grp.city_id = city.city_id
+WHERE LOWER(event_name) LIKE &quot;%toastmaster%&quot;;
+
+-- The exact counts of Toastmaster events for each particular city
+SELECT
+	city,
+    COUNT(event_id) AS total_events
+FROM event
+JOIN grp ON event.group_id = grp.group_id
+JOIN city ON grp.city_id = city.city_id
+WHERE LOWER(event_name) LIKE &quot;%toastmaster%&quot;
+GROUP BY city;</code></pre>
+      </details>
+      <details>
+        <summary>Membership growth</summary>
+        <p><a href="artifacts/part-2/membership-growth.sql" download>Download membership growth (.sql)</a></p>
+        <pre><code>-- The growth of LetsMeet over the years based on the number of members who joined each year
+SELECT 
+	join_yr,
+    COUNT(join_yr)
+FROM
+	(SELECT member_id, YEAR(MIN(joined)) AS join_yr
+    FROM grp_member
+GROUP BY member_id) AS yr
+GROUP BY join_yr
+ORDER BY join_yr DESC; 
+    
+-- Rename the smaller cities to the name of their larger urban areas Chicago, San Francisco, and/or New York
+SET SQL_SAFE_UPDATES = 0;
+
+UPDATE grp_member
+	SET city = &quot;Chicago&quot;
+WHERE city IN (&quot;East Chicago&quot;, &quot;West Chicago&quot;, &quot;North Chicago&quot;, &quot;Chicago Heights&quot;, &quot;Chicago Ridge&quot;);
+
+UPDATE grp_member
+	SET city = &quot;San Francisco&quot;
+WHERE city IN (&quot;South San Francisco&quot;);
+
+UPDATE grp_member
+	SET city = &quot;New York&quot;
+WHERE city IN (&quot;West New York&quot;);
+
+-- The annual growth of LetsMeet for the larger geographical areas of Chicago, San Francisco, and New York
+SELECT
+	join_yr,
+    COUNT(join_yr)
+FROM 
+	(SELECT 
+		member_id,
+		YEAR(MIN(joined)) AS join_yr
+	FROM grp_member
+    WHERE city = &quot;Chicago&quot;
+    GROUP BY member_id) AS yr
+    GROUP BY join_yr
+    ORDER BY join_yr DESC;
+
+SELECT
+	join_yr,
+    COUNT(join_yr)
+FROM 
+	(SELECT 
+		member_id,
+		YEAR(MIN(joined)) AS join_yr
+	FROM grp_member
+    WHERE city = &quot;San Francisco&quot;
+    GROUP BY member_id) AS yr
+    GROUP BY join_yr
+    ORDER BY join_yr DESC;
+
+SELECT
+	join_yr,
+    COUNT(join_yr)
+FROM 
+	(SELECT 
+		member_id,
+		YEAR(MIN(joined)) AS join_yr
+	FROM grp_member
+    WHERE city = &quot;New York&quot;
+    GROUP BY member_id) AS yr
+    GROUP BY join_yr
+    ORDER BY join_yr DESC;
+
+-- Month by month growth for LetsMeet in 2017
+SELECT
+	join_mnth,
+    COUNT(join_mnth)
+FROM
+	(SELECT 
+		member_id, 
+        MONTH(MIN(joined)) AS join_mnth
+	FROM grp_member
+    WHERE YEAR(joined) = 2017
+    GROUP BY member_id) AS mnth
+    GROUP BY join_mnth
+    ORDER BY join_mnth;</code></pre>
+      </details>
+      <details>
+        <summary>Featured groups</summary>
+        <p><a href="artifacts/part-2/featured-groups.sql" download>Download featured groups (.sql)</a></p>
+        <pre><code>-- Query break down groups by rating
+SELECT 
+	CASE
+		WHEN rating BETWEEN 1 AND 1.99 THEN &quot;1-1.99&quot;
+        WHEN rating BETWEEN 2 AND 2.99 THEN &quot;2-2.99&quot;
+        WHEN rating BETWEEN 3 AND 3.99 THEN &quot;3-3.99&quot;
+        WHEN rating BETWEEN 4 AND 4.99 THEN &quot;4-4.99&quot;
+        WHEN rating = 5 THEN &quot;5&quot;
+	END AS rating_category,
+    COUNT(group_id) AS group_count
+FROM grp
+GROUP BY rating_category
+ORDER BY rating_category; 
+
+/*How many groups have 5 star ratings?
+Of the groups that have been rated, what percent of groups are rated 5 stars?
+Is this a reliable measure of the success or popularity of the group?*
+
+- The total amount of groups with 5 star ratings is 745.
+- Of the groups that have been rated, 2.67% were rated 5.
+- We would need more data and other determining factors to consider this as a measure of success or popularity 
+of the group.
+*/
+
+-- Find those with the most members with perfect 5 star rating
+SELECT
+	group_name,
+    members,
+    rating
+FROM grp
+WHERE rating = 5
+ORDER BY members DESC
+LIMIT 5;
+
+-- Adjust query to include the city for each group 
+SELECT
+	group_name,
+    members,
+    rating,
+    city
+FROM grp
+JOIN city ON grp.city_id = city.city_id
+WHERE rating = 5
+ORDER BY members DESC;
+
+-- Ensure a wide variey of groups
+SELECT
+	group_name,
+    members,
+    city,
+    category_name, 
+    rating
+FROM grp
+JOIN city ON grp.city_id = city.city_id
+JOIN category ON grp.category_id= category.category_id
+WHERE rating = 5
+AND city IN (&quot;New York&quot;, &quot;Chicago&quot;, &quot;San Francisco&quot;)
+ORDER BY members DESC;
+
+/*Should you only include groups from the most popular categories?
+What about including only groups from the least represented category to try and increase the variety of groups 
+on LetMeet?*/
+</code></pre>
+      </details>
+    </section>
+    <section class="panel" id="part-3">
+      <h2>Part 3 · Normalizing Data</h2>
+      <p>I split the original membership table into member records and group sign-ups, linked them with foreign keys, and removed selected redundant fields. The MySQL Workbench model shows the revised relationships.</p>
+      <details>
+        <summary>Normalization script</summary>
+        <p><a href="artifacts/part-3/normalization.sql" download>Download normalization script (.sql)</a></p>
+        <pre><code>-- Eliminate redundant columns
+ALTER TABLE venue_ 
+DROP COLUMN country;
+/*The country column in the venue_ table is already present in the city table*/
+
+ALTER TABLE city
+DROP COLUMN distance; 
+/*The distance column in the city table is uniformative*/
+
+ALTER TABLE event
+DROP COLUMN why;
+/*The why column in the event table don&#x27;t add additional value to the data*/
+
+ALTER TABLE category
+DROP COLUMN sort_name;
+/*The sort_name column in the category table contains repetitive information*/
+
+ALTER TABLE grp_member
+DROP COLUMN country;
+/* The country column in the grp_member table is redundant because LetsMeet only 
+operates in one country*/
+
+-- Split grp_member table
+CREATE TABLE group_sign_ups
+SELECT DISTINCT group_id, member_id, joined
+FROM grp_member;
+
+CREATE TABLE members
+SELECT DISTINCT member_id, member_name, city, hometown, member_status
+FROM grp_member;
+
+ALTER TABLE members
+ADD PRIMARY KEY (member_id);
+
+ALTER TABLE group_sign_ups
+ADD FOREIGN KEY (member_id) REFERENCES members(member_id);
+
+ALTER TABLE group_sign_ups
+ADD FOREIGN KEY (group_id) REFERENCES grp(group_id);
+
+DROP TABLE grp_member;
+
+-- Create a new ERD</code></pre>
+      </details>
+      <p><a href="artifacts/part-3/letsmeet-normalized-erd.mwb" download>Download the MySQL Workbench model (.mwb)</a></p>
     </section>
     <section class="panel" id="artifacts">
       <h2>Project Materials</h2>
+      <p>The growth and normalization scripts contain statements that change data or table structure. Use a copy of the lab database to run them.</p>
       <p>The PDF opens with a project overview and findings, followed by the original case study, table definitions, and sample records.</p>
       <ul class="artifact-links">
         <li><a href="artifacts/letsmeet-case-study-and-database-schema.pdf">LetsMeet project summary and database schema (PDF)</a></li>
