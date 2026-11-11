@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="The LetsMeet MySQL case study, including the database schema and project brief.">
+  <meta name="description" content="The LetsMeet MySQL case study, with findings from the database schema review.">
   <title>LetsMeet SQL Case Study | Helen Chu</title>
   <link rel="stylesheet" href="../../assets/styles.css">
 </head>
@@ -16,32 +16,32 @@
   <nav aria-label="Course navigation">
     <a href="../../index.html#projects">All Projects</a>
     <a href="#project-summary">Project Summary</a><a href="#skills-and-learning">Skills and Learning</a>
-    <a href="#approach">Database and Project Scope</a>
+    <a href="#approach">Findings from the Schema Review</a>
     <a href="#artifacts">Project Materials</a>
   </nav>
   <main>
     <section class="panel" id="project-summary">
       <h2>Project Summary</h2>
       <h3>LetsMeet Membership and Event Analysis</h3>
-      <p>LetsMeet is a fictional platform that connects people with local interest groups and events. The MySQL project asks how members use the platform and what changes would make the database easier to maintain and report from. It connects membership, group, event, venue, category, and city data to support reporting for the platform’s stakeholders.</p>
+      <p>LetsMeet is a fictional platform that helps people find local groups and attend events in New York, Chicago, and San Francisco. The project reviews its six-table relational database to understand how Sales, Engineering, and leadership could report on membership, event activity, and venue use.</p>
+      <p>I reviewed the table definitions and sample records, identified what each row represents, and traced how groups connect memberships, events, categories, and cities. I then identified reporting questions the schema supports and checks needed before comparing results.</p>
     </section>
 <section class="panel learning-panel" id="skills-and-learning"><h2>Skills and What I Learned</h2><ul class="skill-tags" aria-label="Project skills"><li>MySQL</li><li>Relational schemas</li><li>Data modeling</li><li>Reporting requirements</li></ul><p>The LetsMeet schema helped me understand how related tables support reporting. A member can appear in several groups, so counting membership rows and counting distinct people answer different questions.</p></section>
     <section class="panel" id="approach">
-      <h2>Database and Project Scope</h2>
-      <p>The membership table stores one row per member and group. An analyst can count rows to measure memberships or count distinct member IDs to measure individual members. Event records can be linked to groups and venues to analyze activity by category or location.</p>
-      <ol>
-        <li><strong>Data Impressions.</strong> Inspect the database and use MySQL queries to answer initial questions about the data.</li>
-        <li><strong>Data Reports.</strong> Summarize findings in reports for stakeholders.</li>
-        <li><strong>Normalizing Data.</strong> Improve the database structure and document the updated relationships in an entity-relationship diagram.</li>
-        <li><strong>Technical Assessment.</strong> Apply SQL skills to interview-style questions.</li>
-      </ol>
+      <h2>Findings from the Schema Review</h2>
+      <ul>
+        <li><strong>Memberships and people are different measures.</strong> Each <code>grp_member</code> row represents one person’s membership in one group. Counting rows measures memberships. Counting distinct <code>member_id</code> values measures people.</li>
+        <li><strong>Events can be compared by group, category, and venue.</strong> The event table links to the group and venue tables. Groups link to categories and cities, making it possible to compare event activity across interests and locations.</li>
+        <li><strong>RSVPs and headcount describe different aspects of engagement.</strong> The event table lists yes RSVPs, maybe RSVPs, waitlist counts, and headcount separately. Confirming how each field is recorded would help distinguish interest from attendance.</li>
+        <li><strong>City and venue data support local reporting.</strong> Venue addresses and coordinates help locate events. The case study flags the city table for cleaning, so I would validate city records and group-to-city matches before comparing markets.</li>
+      </ul>
+      <p>These findings describe what the schema and sample records support. Measuring activity by city or category would require querying the full dataset.</p>
     </section>
     <section class="panel" id="artifacts">
       <h2>Project Materials</h2>
-      <p>The case-study deck documents the table layouts and shows sample records. The project brief describes the expected SQL scripts, reports, and database diagram.</p>
+      <p>The PDF opens with a project overview and findings, followed by the original case study, table definitions, and sample records.</p>
       <ul class="artifact-links">
-        <li><a href="artifacts/letsmeet-case-study-and-database-schema.pdf">LetsMeet case study and database schema (PDF)</a></li>
-        <li><a href="artifacts/letsmeet-sql-project-brief.pdf">LetsMeet SQL project brief (PDF)</a></li>
+        <li><a href="artifacts/letsmeet-case-study-and-database-schema.pdf">LetsMeet project summary and database schema (PDF)</a></li>
       </ul>
     </section>
   </main>
